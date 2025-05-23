@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiFilter, FiSearch, FiTag, FiPlus, FiX } from 'react-icons/fi';
 import { BiSolidMessageRoundedAdd } from 'react-icons/bi';
 import Image from 'next/image';
@@ -7,16 +7,16 @@ import Image from 'next/image';
 export interface User {
   id: string;
   email: string;
-  full_name?: string;
-  avatar_url?: string;
+  full_name?: string | null;  // Allow null values
+  avatar_url?: string | null; // Allow null values
 }
 
 export interface Chat {
   id: string;
-  name?: string;
+  name?: string | null;
   is_group: boolean;
   avatar_url?: string;
-  labels?: string[];
+  labels?: { id: string; name: string; color?: string }[];
   membersUsernames?: string[];
   members?: User[];
   messages?: Message[];
@@ -45,7 +45,7 @@ interface ChatListProps {
   setLabelInputValue: (v: string) => void;
   labelLoading: boolean;
   handleAddLabel: (chatId: string) => void;
-  handleRemoveLabel: (chatId: string, label: string) => void;
+  handleRemoveLabel: (chatId: string, labelId: string) => void; // Note: changed from label: string to labelId: string
   chatFilterValue: string;
   setShowChatFilter: React.Dispatch<React.SetStateAction<boolean>>;
   sidebarWidth: number;
@@ -65,6 +65,54 @@ function getDisplayName(userOrChat: User | Chat): string {
   if ('email' in userOrChat && userOrChat.email) return userOrChat.email.split('@')[0];
   return 'Unknown';
 }
+
+// Custom Filter Component for dropdown
+const CustomFilter = ({ onApply, onClose }: { onApply: (filters: { label: string; chatName: string }) => void, onClose: () => void }) => {
+  const [label, setLabel] = useState('');
+  const [chatName, setChatName] = useState('');
+
+  return (
+    <div className="absolute left-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded shadow-lg z-50 p-3">
+      <div className="mb-2">
+        <label className="block text-xs text-gray-500 mb-1">Filter by Label</label>
+        <input
+          className="w-full border rounded px-2 py-1 text-xs"
+          value={label}
+          onChange={e => setLabel(e.target.value)}
+          placeholder="Enter label"
+        />
+      </div>
+      <div className="mb-3">
+        <label className="block text-xs text-gray-500 mb-1">Filter by Chat Name</label>
+        <input
+          className="w-full border rounded px-2 py-1 text-xs"
+          value={chatName}
+          onChange={e => setChatName(e.target.value)}
+          placeholder="Enter chat name"
+        />
+      </div>
+      <div className="flex gap-2">
+        <button
+          className="flex-1 bg-gray-200 text-gray-700 rounded px-2 py-1 text-xs font-semibold hover:bg-gray-300"
+          onClick={onClose}
+          type="button"
+        >
+          Cancel
+        </button>
+        <button
+          className="flex-1 bg-green-600 text-white rounded px-2 py-1 text-xs font-semibold hover:bg-green-700"
+          onClick={() => {
+            onApply({ label, chatName });
+            onClose();
+          }}
+          type="button"
+        >
+          Apply Filter
+        </button>
+      </div>
+    </div>
+  );
+};
 
 // --- Component ---
 const ChatList: React.FC<ChatListProps> = ({
@@ -91,6 +139,83 @@ const ChatList: React.FC<ChatListProps> = ({
   setShowGroupModal,
   handleSidebarResize,
 }) => {
+  // Add state for client-side rendering flag
+  const [isClient, setIsClient] = useState(false);
+  const [showCustomFilter, setShowCustomFilter] = useState(false);
+  const [activeFilters, setActiveFilters] = useState<{
+    label: string;
+    chatName: string;
+  } | null>(null);
+  
+  // Set flag after component mounts
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+  
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+  
+  // When rendering time, conditionally use client-side formatting
+  const formatMessageTime = (dateStr: string) => {
+    if (!isClient) {
+      // Server-side simple format
+      return formatTime(dateStr);
+    } else {
+      // Client-side locale-aware format
+      return new Date(dateStr).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+  };
+  
+  // Filter chats based on custom filter criteria
+  const filterChats = (chat: Chat) => {
+    // If no active filters, just use the default chatFilterValue
+    if (!activeFilters) {
+      if (!chatFilterValue) return true;
+      const name = chat.name?.toLowerCase() || "";
+      let otherUser = "";
+      if (!chat.is_group && chat.membersUsernames && chat.membersUsernames.length > 0) {
+        otherUser = chat.membersUsernames.find((u: string) => u !== user.email)?.toLowerCase() || "";
+      }
+      return name.includes(chatFilterValue.toLowerCase()) || otherUser.includes(chatFilterValue.toLowerCase());
+    }
+    
+    // Apply custom filters
+    let passes = true;
+    
+    // Filter by label if provided
+    if (activeFilters.label) {
+      const hasLabel = chat.labels?.some(label => 
+        label.name.toLowerCase().includes(activeFilters.label.toLowerCase())
+      );
+      passes = passes && !!hasLabel;
+    }
+    
+    // Filter by chat name if provided
+    if (activeFilters.chatName) {
+      const name = chat.name?.toLowerCase() || "";
+      let otherUser = "";
+      if (!chat.is_group && chat.membersUsernames && chat.membersUsernames.length > 0) {
+        otherUser = chat.membersUsernames.find((u: string) => u !== user.email)?.toLowerCase() || "";
+      }
+      const nameMatches = name.includes(activeFilters.chatName.toLowerCase()) || 
+        otherUser.includes(activeFilters.chatName.toLowerCase());
+      passes = passes && nameMatches;
+    }
+    
+    return passes;
+  };
+  
+  const handleApplyFilter = (filters: { label: string; chatName: string }) => {
+    setActiveFilters(filters.label || filters.chatName ? filters : null);
+  };
+  
   return (
     <aside style={{ width: sidebarWidth }} className="flex flex-col bg-white transition-all duration-100 relative border-r-2 border-gray-200 h-full shadow-md">
       {/* Filter row: fixed below header, responsive to sidebar width */}
@@ -101,14 +226,35 @@ const ChatList: React.FC<ChatListProps> = ({
           top: 'var(--header-height)',
           height: 'var(--filter-height)'
         }}>
-        <button className="flex items-center gap-1 px-3 py-1 rounded font-semibold text-xs bg-gray-100 text-green-700 hover:bg-green-100 hover:text-green-700"
-          onClick={() => setShowChatFilter((prev: boolean) => !prev)}><FiFilter className="text-green-700" /> Custom filter</button>
-        <button className="px-2 py-1 rounded font-semibold text-xs bg-gray-100 text-green-700 hover:bg-green-100 hover:text-green-700"
-          onClick={() => setShowChatFilter((prev: boolean) => !prev)}>Save</button>
+        <div className="relative">
+          <button 
+            className={`flex items-center gap-1 px-3 py-1 rounded font-semibold text-xs ${activeFilters ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-green-700'} hover:bg-green-100 hover:text-green-700`}
+            onClick={() => setShowCustomFilter(!showCustomFilter)}
+          >
+            <FiFilter className={activeFilters ? 'text-green-700' : 'text-gray-500'} /> 
+            Custom filter
+          </button>
+          {showCustomFilter && (
+            <CustomFilter 
+              onApply={handleApplyFilter} 
+              onClose={() => setShowCustomFilter(false)} 
+            />
+          )}
+        </div>
+        <button 
+          className="px-2 py-1 rounded font-semibold text-xs bg-gray-100 text-green-700 hover:bg-green-100 hover:text-green-700"
+          onClick={() => setActiveFilters(null)}
+          disabled={!activeFilters}
+        >
+          Clear
+        </button>
         <button className="flex items-center gap-1 px-3 py-1 rounded font-semibold text-xs bg-gray-100 text-green-700 hover:bg-green-100 hover:text-green-700"
           onClick={() => setShowChatFilter((prev: boolean) => !prev)}><FiSearch className="text-green-700" /> Search</button>
-        <button className="flex items-center gap-1 px-3 py-1 rounded font-semibold text-xs bg-gray-100 text-green-700 hover:bg-green-100 hover:text-green-700"
-          onClick={() => setShowChatFilter((prev: boolean) => !prev)}><FiTag className="text-green-700" /> Filtered</button>
+        {activeFilters && (
+          <button className="flex items-center gap-1 px-3 py-1 rounded font-semibold text-xs bg-green-100 text-green-700 hover:bg-green-100 hover:text-green-700">
+            <FiTag className="text-green-700" /> Filtered
+          </button>
+        )}
       </div>
       {/* Chat List (scrollable, relative for button) */}
       <div className="flex-1 relative overflow-y-auto" style={{
@@ -122,19 +268,11 @@ const ChatList: React.FC<ChatListProps> = ({
             <div className="p-4 text-gray-500">No chats found.</div>
           ) : (
             chats
-              .filter(chat => {
-                if (!chatFilterValue) return true;
-                const name = chat.name?.toLowerCase() || "";
-                let otherUser = "";
-                if (!chat.is_group && chat.membersUsernames && chat.membersUsernames.length > 0) {
-                  otherUser = chat.membersUsernames.find((u: string) => u !== user.email)?.toLowerCase() || "";
-                }
-                return name.includes(chatFilterValue.toLowerCase()) || otherUser.includes(chatFilterValue.toLowerCase());
-              })
+              .filter(filterChats)
               .map(chat => {
                 const lastMsgObj = getLastMsg(chat);
                 const lastMsg = lastMsgObj ? lastMsgObj.content : "";
-                const lastMsgTime = lastMsgObj ? new Date(lastMsgObj.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "";
+                const lastMsgTime = lastMsgObj ? formatMessageTime(lastMsgObj.created_at) : "";
                 return (
                   <section
                     key={chat.id}
@@ -155,10 +293,20 @@ const ChatList: React.FC<ChatListProps> = ({
                         <span className="font-semibold text-gray-900 truncate max-w-[120px]">{getDisplayName(chat)}</span>
                         {/* Inline labels to the right of name */}
                         <div className="flex items-center gap-1 flex-wrap">
-                          {Array.isArray(chat.labels) && chat.labels.map((label: string) => (
-                            <span key={label} className="px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-xs font-semibold flex items-center gap-1">
-                              {label}
-                              <button type="button" className="ml-1 text-blue-400 hover:text-red-500" onClick={e => { e.stopPropagation(); handleRemoveLabel(chat.id, label); }} disabled={labelLoading}><FiX size={12} /></button>
+                          {Array.isArray(chat.labels) && chat.labels.map((label: any) => (
+                            <span key={label.id} className="px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-xs font-semibold flex items-center gap-1">
+                              {label.name}
+                              <button
+                                type="button"
+                                className="ml-1 text-blue-400 hover:text-red-500"
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handleRemoveLabel(chat.id, label.id);
+                                }}
+                                disabled={labelLoading}
+                              >
+                                <FiX size={12} />
+                              </button>
                             </span>
                           ))}
                           {labelInputChatId === chat.id ? (

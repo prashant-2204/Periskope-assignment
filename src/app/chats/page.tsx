@@ -1,8 +1,3 @@
- 
-
-
-
-
 "use client";
 import { useAuth } from "@/lib/AuthContext";
 import { useEffect, useState, useRef } from "react";
@@ -27,7 +22,10 @@ import {
   sendMessage,
   fetchAllUsers,
   createGroupChat,
-  createDirectChat
+  createDirectChat,
+  addLabelToChat,
+  removeLabelFromChat,
+  fetchUserChatsWithLabels
 } from "@/lib/supabaseApi";
 
 function ensureUser(obj: any, fallbackId: string = ''): User {
@@ -111,24 +109,9 @@ export default function ChatsPage() {
   useEffect(() => {
     if (!authLoading && user) {
       setChatsLoading(true);
-      fetchUserChats(user.id)
-        .then(data => {
-          setChats(data);
-          setChatsLoading(false);
-          if (data.length > 0) setSelectedChat(data[0]);
-          // Build user cache from all chat members
-          const cache: { [id: string]: User } = {};
-          data.forEach((chat: any) => {
-            (chat.members || []).forEach((member: User) => {
-              if (member && member.id) cache[member.id] = member;
-            });
-          });
-          setUserCache(cache);
-        })
-        .catch(() => {
-          toast.error("Failed to load chats");
-          setChatsLoading(false);
-        });
+      fetchUserChatsWithLabels(user.id)
+        .then(data => setChats(data as unknown as Chat[]))
+        .finally(() => setChatsLoading(false));
     }
   }, [authLoading, user]);
 
@@ -489,42 +472,21 @@ export default function ChatsPage() {
 
   // 2. Label management functions
   async function handleAddLabel(chatId: string) {
-    const chat = chats.find((c: any) => c.id === chatId);
-    const labels = Array.isArray(chat?.labels) ? chat.labels : [];
-    const newLabel = labelInputValue.trim();
-    if (!newLabel) {
-      toast.error('Label cannot be empty');
-      return;
-    }
-    if (labels.includes(newLabel)) {
-      toast.error('Label already exists');
-      return;
-    }
     setLabelLoading(true);
-    // Optimistically update local state for instant feedback
-    setChats(prevChats => prevChats.map(c => c.id === chatId ? { ...c, labels: [...labels, newLabel] } : c));
     setLabelInputValue("");
     setLabelInputChatId(null);
     try {
-      await supabase.from('chats').update({ labels: [...labels, newLabel] }).eq('id', chatId);
-      // Refetch chats in background to ensure sync
-      fetchUserChats(user.id).then(setChats);
-    } catch (err) {
-      toast.error("Failed to add label");
+      await addLabelToChat(chatId, labelInputValue.trim());
+      // No need to refetch here, realtime will update
     } finally {
       setLabelLoading(false);
     }
   }
-  async function handleRemoveLabel(chatId: string, label: string) {
+  async function handleRemoveLabel(chatId: string, labelId: string) {
     setLabelLoading(true);
     try {
-      const chat = chats.find(c => c.id === chatId);
-      if (!chat) throw new Error('Chat not found');
-      const newLabels = (chat.labels || []).filter(l => l !== label);
-      await supabase.from('chats').update({ labels: newLabels }).eq('id', chatId);
-      setChats(prev => prev.map(c => c.id === chatId ? { ...c, labels: newLabels } : c));
-    } catch (err) {
-      toast.error('Failed to remove label');
+      await removeLabelFromChat(chatId, labelId);
+      // No need to refetch here, realtime will update
     } finally {
       setLabelLoading(false);
     }
@@ -753,6 +715,7 @@ export default function ChatsPage() {
           <div className="flex flex-col items-center gap-0.5 w-full">
             {/* Home icon */}
             <button className="w-10 h-10 flex items-center justify-center mt-2 mb-0.5" onClick={() => setMainLabel('Home')}><FaHome size={18} className={mainLabel === 'Home' ? 'text-blue-500' : 'text-gray-400'} /></button>
+            <button className="w-10 h-10 flex items-center justify-center mt-2 mb-0.5" onClick={() => setMainLabel('Home')}><FaHome size={18} className={mainLabel === 'Home' ? 'text-blue-500' : 'text-gray-400'} /></button>
             {/* Green chat bubble */}
             <button
               className={`w-10 h-10 flex items-center justify-center mb-0.5`}
@@ -969,4 +932,4 @@ export default function ChatsPage() {
       )}
     </div>
   );
-} 
+}

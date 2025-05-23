@@ -74,17 +74,23 @@ const ChatArea: React.FC<ChatAreaProps> = ({
         }}>
         {/* Group avatar */}
         <div className="flex items-center gap-3">
-          {selectedChat.avatar_url ? (
-            <img src={selectedChat.avatar_url} alt={selectedChat.name} className="w-10 h-10 rounded-full object-cover" />
+          {selectedChat?.avatar_url ? (
+            <img 
+              src={selectedChat.avatar_url || ''} 
+              alt={selectedChat.name || 'Chat'} 
+              className="w-10 h-10 rounded-full object-cover" 
+            />
           ) : (
             <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center" />
           )}
           <div className="flex flex-col min-w-0">
-            <span className="font-semibold text-gray-900  text-lg truncate">{getDisplayName(selectedChat)}</span>
+            <span className="font-semibold text-gray-900 text-lg truncate">
+              {selectedChat ? getDisplayName(selectedChat) : 'Unknown'}
+            </span>
             {/* Member usernames, up to 5 */}
             <span className="text-xs text-gray-500 truncate">
-              {(selectedChat.members || []).slice(0, 5).map((m: any) => getDisplayName(m)).join(", ")}
-              {selectedChat.members && selectedChat.members.length > 5 &&
+              {(selectedChat?.members || []).slice(0, 5).map((m: any) => getDisplayName(m)).join(", ")}
+              {selectedChat?.members && selectedChat.members.length > 5 &&
                 `, +${selectedChat.members.length - 5}`}
             </span>
           </div>
