@@ -20,14 +20,14 @@ export default function LoginPage() {
       });
       if (error) {
         toast.error(error.message);
-        //console.error("Login error:", error);
+        ////console.error("Login error:", error);
       } else {
         toast.success("Logged in successfully!");
         window.location.href = "/chats";
       }
     } catch (err) {
-      toast.error("Unexpected error. Check //console.");
-      //console.error("Unexpected login error:", err);
+      toast.error("Unexpected error. Check ////console.");
+      ////console.error("Unexpected login error:", err);
     } finally {
       setLoading(false);
     }

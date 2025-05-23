@@ -38,15 +38,15 @@ export default function RegisterPage() {
 			});
 			if (error) {
 				toast.error(error.message);
-				//console.error("Register error:", error);
+				////console.error("Register error:", error);
 			} else {
 				toast.success(
 					"Registration successful! Please check your email to confirm."
 				);
 			}
 		} catch (err) {
-			toast.error("Unexpected error. Check //console.");
-			//console.error("Unexpected register error:", err);
+			toast.error("Unexpected error. Check ////console.");
+			////console.error("Unexpected register error:", err);
 		} finally {
 			setLoading(false);
 		}

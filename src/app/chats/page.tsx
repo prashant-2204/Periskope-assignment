@@ -1,3 +1,8 @@
+ 
+
+
+
+
 "use client";
 import { useAuth } from "@/lib/AuthContext";
 import { useEffect, useState, useRef } from "react";
@@ -633,9 +638,11 @@ export default function ChatsPage() {
 
   // Update chat list rendering to use messagesCache
   const getLastMsg = (chat: Chat | undefined) => {
-    if (!chat || !Array.isArray(chat.messages) || chat.messages.length === 0) return null;
-    // Type guard: only return if last message has required fields
-    const last = chat.messages[chat.messages.length - 1];
+    if (!chat) return null;
+    // Prefer messages from messagesCache if available
+    const msgs = messagesCache[chat.id] || chat.messages || [];
+    if (!Array.isArray(msgs) || msgs.length === 0) return null;
+    const last = msgs[msgs.length - 1];
     if (last && typeof last.id === 'string' && typeof last.sender_id === 'string' && typeof last.content === 'string' && typeof last.created_at === 'string') {
       return last as Message;
     }
@@ -724,7 +731,7 @@ export default function ChatsPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 overflow-hidden">
+    <div className="flex flex-col h-screen bg-gray-100 overflow-hidden">
       {/* Add a <style jsx global> block at the top of the return to set CSS variables on :root: */}
       <style jsx global>{`
         :root {
@@ -813,7 +820,7 @@ export default function ChatsPage() {
           />
         )}
         {/* Main Content: Section Switching */}
-        <main className="flex-1 flex flex-col bg-gray-50 dark:bg-gray-900 h-full overflow-hidden">
+        <main className="flex-1 flex flex-col bg-gray-50 h-full overflow-hidden">
           {mainLabel === "Chats" && (
             <ChatArea
               messages={messages}
@@ -848,7 +855,7 @@ export default function ChatsPage() {
           )}
           {mainLabel === "Settings" && (
             <div className="flex flex-1 flex-col items-center justify-center">
-              <div className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-2">
+              <div className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                 <FiSettings className="text-2xl" /> Settings
               </div>
               <button
@@ -866,7 +873,7 @@ export default function ChatsPage() {
           )}
           {mainLabel !== "Chats" && mainLabel !== "Settings" && (
             <div className="flex flex-1 flex-col items-center justify-center">
-              <div className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+              <div className="text-3xl font-bold text-gray-800 mb-4 flex items-center gap-2">
                 {sectionIcons[mainLabel] ? sectionIcons[mainLabel]({ size: 32 }) : null}
                 {mainLabel}
               </div>
@@ -962,4 +969,4 @@ export default function ChatsPage() {
       )}
     </div>
   );
-}
+} 

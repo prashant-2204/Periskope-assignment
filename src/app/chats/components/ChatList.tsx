@@ -92,12 +92,9 @@ const ChatList: React.FC<ChatListProps> = ({
   handleSidebarResize,
 }) => {
   return (
-    <aside
-      style={{ width: sidebarWidth }}
-      className="flex flex-col bg-white transition-all duration-100 relative border-r-2 border-gray-200 h-full shadow-md"
-    >
+    <aside style={{ width: sidebarWidth }} className="flex flex-col bg-white transition-all duration-100 relative border-r-2 border-gray-200 h-full shadow-md">
       {/* Filter row: fixed below header, responsive to sidebar width */}
-      <div className="flex items-center gap-2 px-3 py-2 border-b-2 border-gray-200 bg-white fixed z-40"
+      <div className="flex items-center gap-2 px-3 py-2 border-b-2 border-gray-200 fixed z-40"
         style={{
           left: '56px',
           width: 'var(--sidebar-width, 340px)',
@@ -136,13 +133,14 @@ const ChatList: React.FC<ChatListProps> = ({
               })
               .map(chat => {
                 const lastMsgObj = getLastMsg(chat);
-                const lastMsg = lastMsgObj ? lastMsgObj.content : "No messages yet";
+                const lastMsg = lastMsgObj ? lastMsgObj.content : "";
                 const lastMsgTime = lastMsgObj ? new Date(lastMsgObj.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "";
                 return (
                   <section
                     key={chat.id}
                     className={`flex items-center gap-3 px-4 py-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50 ${selectedChat?.id === chat.id ? "bg-gray-200" : ""}`}
                     onClick={() => setSelectedChat(chat)}
+                    onContextMenu={e => handleContextMenu(e, chat)}
                   >
                     {/* Avatar or group icon */}
                     {chat.avatar_url ? (
@@ -187,12 +185,20 @@ const ChatList: React.FC<ChatListProps> = ({
                       </div>
                       {/* WhatsApp-style last message and time */}
                       <div className="flex items-center justify-between mt-0.5">
-                        <span className="truncate text-gray-500 text-sm max-w-[70%]">
-                          {lastMsg}
-                        </span>
-                        <span className="text-xs text-gray-400 ml-2 whitespace-nowrap">
-                          {lastMsgTime}
-                        </span>
+                        {lastMsgObj ? (
+                          <>
+                            <span className="truncate text-gray-500 text-sm max-w-[70%]">
+                              {lastMsg}
+                            </span>
+                            <span className="text-xs text-gray-400 ml-2 whitespace-nowrap">
+                              {lastMsgTime}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="truncate text-gray-500 text-sm max-w-[70%]">
+                            No new message
+                          </span>
+                        )}
                       </div>
                     </div>
                   </section>

@@ -41,14 +41,14 @@ export async function fetchChatMessages(
 ): Promise<Message[]> {
   try {
     // First verify the chat exists and user has access
-    //console.log('[fetchChatMessages] Checking access for chatId:', chatId, 'userId:', userId);
+    ////console.log('[fetchChatMessages] Checking access for chatId:', chatId, 'userId:', userId);
     const { data: chatAccess, error: accessError } = await supabase
       .from("chat_members")
       .select("chat_id")
       .eq("chat_id", chatId)
       .eq("user_id", userId)
       .single();
-    //console.log('[fetchChatMessages] chatAccess:', chatAccess, 'accessError:', accessError);
+    ////console.log('[fetchChatMessages] chatAccess:', chatAccess, 'accessError:', accessError);
 
     if (accessError || !chatAccess) {
       throw new Error("Chat not found or access denied");
@@ -74,7 +74,7 @@ export async function fetchChatMessages(
       .order("created_at", { ascending: true });
 
     if (error) {
-      //console.error("Error fetching messages:", error);
+      ////console.error("Error fetching messages:", error);
       throw error;
     }
 
@@ -93,7 +93,7 @@ export async function fetchChatMessages(
       sender_name: msg.sender?.full_name || msg.sender?.email,
     }));
   } catch (error) {
-    //console.error("Error in fetchChatMessages:", error);
+    ////console.error("Error in fetchChatMessages:", error);
     throw error;
   }
 }
@@ -132,13 +132,13 @@ export async function sendMessage(
       .single();
 
     if (error) {
-      //console.error("Error sending message:", error);
+      ////console.error("Error sending message:", error);
       throw error;
     }
 
     return data;
   } catch (error) {
-    //console.error("Error in sendMessage:", error);
+    ////console.error("Error in sendMessage:", error);
     throw error;
   }
 }
@@ -197,7 +197,7 @@ export async function fetchChatMessagesWithSenders(
 ): Promise<Message[]> {
   try {
     // Log types and values
-    //console.log('[fetchChatMessagesWithSenders] chatId:', chatId, typeof chatId, 'userId:', userId, typeof userId);
+    ////console.log('[fetchChatMessagesWithSenders] chatId:', chatId, typeof chatId, 'userId:', userId, typeof userId);
     // Trim IDs
     const trimmedChatId = chatId.trim();
     const trimmedUserId = userId.trim();
@@ -208,13 +208,13 @@ export async function fetchChatMessagesWithSenders(
       .eq("chat_id", trimmedChatId)
       .eq("user_id", trimmedUserId)
       .single();
-    //console.log('[fetchChatMessagesWithSenders] chatAccess:', chatAccess, 'accessError:', accessError);
+    ////console.log('[fetchChatMessagesWithSenders] chatAccess:', chatAccess, 'accessError:', accessError);
     // Also log all chat_members for this chat
     const { data: allMembers, error: allMembersError } = await supabase
       .from("chat_members")
       .select("*")
       .eq("chat_id", trimmedChatId);
-    //console.log('[fetchChatMessagesWithSenders] all chat_members for chat:', allMembers, 'error:', allMembersError);
+    ////console.log('[fetchChatMessagesWithSenders] all chat_members for chat:', allMembers, 'error:', allMembersError);
     if (accessError || !chatAccess) {
       throw new Error("Chat not found or access denied");
     }
@@ -225,7 +225,7 @@ export async function fetchChatMessagesWithSenders(
       .eq("chat_id", trimmedChatId)
       .order("created_at", { ascending: true });
     if (msgError) {
-      //console.error("Error fetching messages:", msgError);
+      ////console.error("Error fetching messages:", msgError);
       throw msgError;
     }
     if (!messages) return [];
@@ -241,7 +241,7 @@ export async function fetchChatMessagesWithSenders(
         "Unknown",
     }));
   } catch (error) {
-    //console.error("Error in fetchChatMessagesWithSenders:", error);
+    ////console.error("Error in fetchChatMessagesWithSenders:", error);
     throw error;
   }
 }
@@ -292,11 +292,11 @@ export async function createDirectChat(userId1: string, userId2: string) {
 //   const labels = Array.isArray(chat?.labels) ? chat.labels : [];
 //   const newLabel = labelInputValue.trim();
 //   if (!newLabel) {
-    
+
 //     return;
 //   }
 //   if (labels.includes(newLabel)) {
-    
+
 //     return;
 //   }
 //   setLabelLoading(true);

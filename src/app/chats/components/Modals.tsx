@@ -1,9 +1,6 @@
 import React from 'react';
 import { Dialog } from '@headlessui/react';
 import { User } from './ChatList';
-// TODO: Import types for modal data if needed
-// TODO: Accept props for modal open/close state, handlers, and any required data
-// TODO: Add clear comments for maintainability
 
 interface GroupModalProps {
   open: boolean;
@@ -18,22 +15,32 @@ interface GroupModalProps {
 }
 
 // Group Creation Modal
-export const GroupModal = ({ open, onClose, groupName, setGroupName, allUsers, groupMembers, setGroupMembers, groupLoading, handleCreateGroup }: GroupModalProps) => (
+export const GroupModal = ({
+  open,
+  onClose,
+  groupName,
+  setGroupName,
+  allUsers,
+  groupMembers,
+  setGroupMembers,
+  groupLoading,
+  handleCreateGroup,
+}: GroupModalProps) => (
   <Dialog open={open} onClose={onClose} className="fixed z-50 inset-0 overflow-y-auto">
     <div className="flex items-center justify-center min-h-screen px-4">
       <div className="fixed inset-0 bg-black opacity-30" aria-hidden="true" />
-      <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md z-10">
-        <Dialog.Title className="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">Create Group</Dialog.Title>
+      <div className="relative bg-white rounded-lg shadow-lg p-6 w-full max-w-md z-10">
+        <Dialog.Title className="text-lg font-bold mb-4 text-gray-900">Create Group</Dialog.Title>
         <form onSubmit={handleCreateGroup} className="flex flex-col gap-4">
           <input
             type="text"
             placeholder="Group Name"
             value={groupName}
             onChange={e => setGroupName(e.target.value)}
-            className="rounded px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 outline-none"
+            className="rounded px-3 py-2 bg-gray-100 text-gray-900 outline-none"
             required
           />
-          <div className="max-h-40 overflow-y-auto border rounded bg-gray-50 dark:bg-gray-700 p-2">
+          <div className="max-h-40 overflow-y-auto border rounded bg-gray-50 p-2">
             {allUsers.length === 0 ? (
               <div className="text-gray-500 text-sm">No users found.</div>
             ) : (
@@ -50,7 +57,7 @@ export const GroupModal = ({ open, onClose, groupName, setGroupName, allUsers, g
                       );
                     }}
                   />
-                  <span className="text-gray-900 dark:text-gray-100">{u.full_name || u.email}</span>
+                  <span className="text-gray-900">{u.full_name || u.email}</span>
                 </label>
               ))
             )}
@@ -59,7 +66,7 @@ export const GroupModal = ({ open, onClose, groupName, setGroupName, allUsers, g
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-500"
+              className="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300"
             >
               Cancel
             </button>
@@ -89,7 +96,16 @@ interface NewChatModalProps {
 }
 
 // New Chat Modal
-export const NewChatModal = ({ open, onClose, newChatSearch, setNewChatSearch, newChatUsers, newChatLoading, newChatError, handleStartChat }: NewChatModalProps) => (
+export const NewChatModal = ({
+  open,
+  onClose,
+  newChatSearch,
+  setNewChatSearch,
+  newChatUsers,
+  newChatLoading,
+  newChatError,
+  handleStartChat,
+}: NewChatModalProps) => (
   <Dialog open={open} onClose={onClose} className="fixed z-50 inset-0 overflow-y-auto">
     <div className="flex items-center justify-center min-h-screen px-4">
       <div className="fixed inset-0 bg-black opacity-30" aria-hidden="true" />
@@ -160,18 +176,30 @@ interface AddMembersModalProps {
 }
 
 // Add Members Modal
-export const AddMembersModal = ({ open, onClose, newChatSearch, setNewChatSearch, newChatUsers, newChatLoading, newChatError, selectedMembers, setSelectedMembers, handleAddMembers, selectedChat }: AddMembersModalProps) => (
+export const AddMembersModal = ({
+  open,
+  onClose,
+  newChatSearch,
+  setNewChatSearch,
+  newChatUsers,
+  newChatLoading,
+  newChatError,
+  selectedMembers,
+  setSelectedMembers,
+  handleAddMembers,
+  selectedChat,
+}: AddMembersModalProps) => (
   <Dialog open={open} onClose={onClose} className="fixed z-50 inset-0 overflow-y-auto">
     <div className="flex items-center justify-center min-h-screen px-4">
       <div className="fixed inset-0 bg-black opacity-30" aria-hidden="true" />
-      <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md z-10">
-        <Dialog.Title className="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">Add Members to Group</Dialog.Title>
+      <div className="relative bg-white rounded-lg shadow-lg p-6 w-full max-w-md z-10">
+        <Dialog.Title className="text-lg font-bold mb-4 text-gray-900">Add Members to Group</Dialog.Title>
         <input
           type="text"
           placeholder="Search users..."
           value={newChatSearch}
           onChange={e => setNewChatSearch(e.target.value)}
-          className="w-full mb-3 px-3 py-2 rounded border border-gray-200 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 outline-none"
+          className="w-full mb-3 px-3 py-2 rounded border border-gray-200 bg-gray-50 text-gray-900 outline-none"
         />
         <div className="max-h-60 overflow-y-auto mb-4">
           {newChatLoading ? (
@@ -206,7 +234,7 @@ export const AddMembersModal = ({ open, onClose, newChatSearch, setNewChatSearch
                   <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold">
                     {u.full_name?.[0] || u.email?.[0] || "U"}
                   </div>
-                  <span className="text-gray-900 dark:text-gray-100">{u.full_name || u.email}</span>
+                  <span className="text-gray-900">{u.full_name || u.email}</span>
                   <span className="text-xs text-gray-500">{u.email}</span>
                 </label>
               ))

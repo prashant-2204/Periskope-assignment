@@ -80,7 +80,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
             <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center" />
           )}
           <div className="flex flex-col min-w-0">
-            <span className="font-semibold text-gray-900 dark:text-gray-100 text-lg truncate">{getDisplayName(selectedChat)}</span>
+            <span className="font-semibold text-gray-900  text-lg truncate">{getDisplayName(selectedChat)}</span>
             {/* Member usernames, up to 5 */}
             <span className="text-xs text-gray-500 truncate">
               {(selectedChat.members || []).slice(0, 5).map((m: any) => getDisplayName(m)).join(", ")}
