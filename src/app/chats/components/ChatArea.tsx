@@ -1,4 +1,4 @@
-import React, { RefObject } from 'react';
+import React, { RefObject, useEffect, useState } from 'react';
 import { IoMdSend } from 'react-icons/io';
 import { FiPaperclip, FiImage, FiMic, FiSmile, FiClock, FiStar, FiChevronDown, FiSearch, FiUsers } from 'react-icons/fi';
 import Image from 'next/image';
@@ -53,11 +53,25 @@ const ChatArea: React.FC<ChatAreaProps> = ({
   formatMessageDate,
   setShowAddMembersModal,
 }) => {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   if (!selectedChat) return (
     <div className="flex-1 flex items-center justify-center text-gray-400 text-lg">
       Select a chat to start messaging
     </div>
   );
+
+  // Format time helper
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
 
   return (
     <>
@@ -85,7 +99,13 @@ const ChatArea: React.FC<ChatAreaProps> = ({
           )}
           <div className="flex flex-col min-w-0">
             <span className="font-semibold text-gray-900 text-lg truncate">
-              {selectedChat ? getDisplayName(selectedChat) : 'Unknown'}
+              {!selectedChat.is_group && selectedChat.members ? 
+                // For direct chats, show the other person's name
+                selectedChat.members.find(m => m.id !== user.id)?.full_name || 
+                selectedChat.members.find(m => m.id !== user.id)?.email?.split('@')[0] || 
+                'Chat' : 
+                // For groups, show group name
+                selectedChat.name || 'Group Chat'}
             </span>
             {/* Member usernames, up to 5 */}
             <span className="text-xs text-gray-500 truncate">
@@ -187,19 +207,30 @@ const ChatArea: React.FC<ChatAreaProps> = ({
                         <span className="font-bold text-green-700 text-sm">{senderDisplayName}</span>
                       </div>
                       <div>
-                        {msg.content.startsWith('[Image]') && msg.file_url ? (
-                          <img
-                            src={msg.file_url}
-                            alt={msg.content.replace('[Image]', '').trim()}
-                            className="max-w-xs max-h-60 rounded-lg mb-1"
-                            style={{ objectFit: 'cover' }}
-                          />
-                        ) : msg.content.startsWith('[Audio]') && msg.file_url ? (
+                        {msg.file_url && msg.content.startsWith('[Image]') ? (
+                          <>
+                            <img
+                              src={msg.file_url}
+                              alt={msg.content.replace('[Image]', '').trim()}
+                              className="max-w-xs max-h-60 rounded-lg mb-1"
+                              style={{ objectFit: 'cover' }}
+                              onError={(e) => {
+                                console.error('Image failed to load:', msg.file_url);
+                                e.currentTarget.style.display = 'none';
+                                const fallback = e.currentTarget.nextElementSibling;
+                                if (fallback) (fallback as HTMLElement).style.display = 'block';
+                              }}
+                            />
+                            <div style={{display: 'none'}} className="text-red-500 text-xs">
+                              Image failed to load. <a href={msg.file_url} target="_blank" rel="noopener noreferrer" className="underline">Open directly</a>
+                            </div>
+                          </>
+                        ) : msg.file_url && msg.content.startsWith('[Audio]') ? (
                           <audio controls className="my-1">
                             <source src={msg.file_url} type="audio/webm" />
                             Your browser does not support the audio element.
                           </audio>
-                        ) : msg.content.startsWith('[File]') && msg.file_url ? (
+                        ) : msg.file_url && msg.content.startsWith('[File]') ? (
                           <a
                             href={msg.file_url}
                             target="_blank"
@@ -214,7 +245,10 @@ const ChatArea: React.FC<ChatAreaProps> = ({
                         )}
                       </div>
                       <div className="text-xs mt-1 flex gap-2 items-center text-gray-500 justify-end">
-                        {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {isClient 
+                          ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                          : formatTime(msg.created_at)
+                        }
                       </div>
                     </div>
                   </div>

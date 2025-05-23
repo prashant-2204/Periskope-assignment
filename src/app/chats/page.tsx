@@ -278,7 +278,7 @@ export default function ChatsPage() {
   // Handle file upload (general files)
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !selectedChat) return;
+    if (!file || !selectedChat) return; // Add null check here
     setIsUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
@@ -305,26 +305,43 @@ export default function ChatsPage() {
 
   // Handle image upload
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !selectedChat) return;
+    if (!e.target.files || !e.target.files[0] || !selectedChat) return; // Check selectedChat here
+    const file = e.target.files[0];
+    console.log("Uploading image:", file.name, "type:", file.type);
+    
+    // Show toast for upload start
+    const uploadToastId = toast.loading(`Uploading ${file.name}...`);
+    
     setIsUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `${user.id}/${selectedChat.id}/images/${fileName}`;
+      const filePath = `${user.id}/${selectedChat.id}/images/${fileName}`; // Now safe
       const { error: uploadError } = await supabase.storage.from('chat-files').upload(filePath, file);
-      if (uploadError) throw uploadError;
+      
+      if (uploadError) {
+        toast.error(`Upload failed: ${uploadError.message}`, { id: uploadToastId });
+        throw uploadError;
+      }
+      
       const { data: { publicUrl } } = supabase.storage.from('chat-files').getPublicUrl(filePath);
+      console.log("Image uploaded successfully, URL:", publicUrl);
+      
+      // Update toast to show upload success
+      toast.success(`Image uploaded!`, { id: uploadToastId });
+      
+      // Show sending toast
+      const sendToastId = toast.loading('Sending image...');
+      
       await sendMessage(selectedChat.id, user.id, `[Image] ${file.name}`, publicUrl);
-      const data = await fetchChatMessagesWithSenders(selectedChat.id, user.id);
-      const updated = (Array.isArray(data) ? data : [])
-        .map(m => ({
-          ...m,
-          sender: ensureUser(m.sender, m.sender_id || '')
-        } as Message));
-      setMessages(updated);
-    } catch (err) {
-      toast.error("Failed to upload image");
+      console.log("Image message sent");
+      
+      // Update toast to show send success
+      toast.success('Image sent!', { id: sendToastId });
+      
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast.error('Failed to upload or send image');
     } finally {
       setIsUploading(false);
       if (imageInputRef.current) imageInputRef.current.value = "";
@@ -333,7 +350,7 @@ export default function ChatsPage() {
 
   // Handle audio upload
   const handleAudioUpload = async (audioBlob: Blob) => {
-    if (!audioBlob || !selectedChat) {
+    if (!audioBlob || !selectedChat) { // Changed to combine these checks
       toast.error("No audio recorded");
       return;
     }

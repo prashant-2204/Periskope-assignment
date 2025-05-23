@@ -372,10 +372,23 @@ export async function createDirectChat(userA: string, userB: string) {
         .eq('user_id', userB)
     ]);
   if (existing && existing.length > 0) return existing[0];
-  // Create chat
+  
+  // Get userB's info to use for the chat name
+  const { data: userBInfo } = await supabase
+    .from('users')
+    .select('full_name, email')
+    .eq('id', userB)
+    .single();
+  
+  // Create chat with recipient's name
+  const chatName = userBInfo?.full_name || userBInfo?.email?.split('@')[0] || null;
+  
   const { data: chatData, error: chatError } = await supabase
     .from('chats')
-    .insert([{ is_group: false }])
+    .insert([{ 
+      is_group: false,
+      name: chatName  // Use recipient's name as fallback
+    }])
     .select()
     .single();
   if (chatError) throw chatError;

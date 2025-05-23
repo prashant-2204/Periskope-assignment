@@ -66,6 +66,26 @@ function getDisplayName(userOrChat: User | Chat): string {
   return 'Unknown';
 }
 
+// Utility to get chat display name
+function getChatDisplayName(chat: Chat, currentUserId: string): string {
+  // For groups, use group name
+  if (chat.is_group && chat.name) return chat.name;
+  
+  // For direct chats, show the other user's name
+  if (!chat.is_group && chat.members && chat.members.length > 0) {
+    // Find the other user in the chat
+    const otherUser = chat.members.find(m => m.id !== currentUserId);
+    if (otherUser) {
+      if (otherUser.full_name) return otherUser.full_name;
+      if (otherUser.email) return otherUser.email.split('@')[0];
+    }
+  }
+  
+  // Fallbacks
+  if (chat.name) return chat.name;
+  return 'Chat';  // Better than "Unknown"
+}
+
 // Custom Filter Component for dropdown
 const CustomFilter = ({ onApply, onClose }: { onApply: (filters: { label: string; chatName: string }) => void, onClose: () => void }) => {
   const [label, setLabel] = useState('');
@@ -290,7 +310,15 @@ const ChatList: React.FC<ChatListProps> = ({
                     )}
                     <div className="flex-1 min-w-0 flex flex-col justify-center">
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="font-semibold text-gray-900 truncate max-w-[120px]">{getDisplayName(chat)}</span>
+                        <span className="font-semibold text-gray-900 truncate max-w-[120px]">
+                          {!chat.is_group && chat.members ? 
+                            // For direct chats, show the other person's name
+                            chat.members.find(m => m.id !== user.id)?.full_name || 
+                            chat.members.find(m => m.id !== user.id)?.email?.split('@')[0] || 
+                            'Chat' : 
+                            // For groups, show group name
+                            chat.name || 'Group Chat'}
+                        </span>
                         {/* Inline labels to the right of name */}
                         <div className="flex items-center gap-1 flex-wrap">
                           {Array.isArray(chat.labels) && chat.labels.map((label: any) => (
