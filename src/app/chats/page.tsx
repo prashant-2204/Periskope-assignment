@@ -21,7 +21,8 @@ import {
   fetchChatMessagesWithSenders,
   sendMessage,
   fetchAllUsers,
-  createGroupChat
+  createGroupChat,
+  createDirectChat
 } from "@/lib/supabaseApi";
 
 function ensureUser(obj: any, fallbackId: string = ''): User {
@@ -131,20 +132,20 @@ export default function ChatsPage() {
     if (!selectedChat || !user) return;
     const cached = messagesCache[selectedChat.id];
     if (cached) {
-      console.log('Using cached messages:', cached);
+      //console.log('Using cached messages:', cached);
       setMessages(cached);
       setMessagesLoading(false);
     } else {
       setMessagesLoading(true);
       fetchChatMessagesWithSenders(selectedChat.id, user.id)
         .then(data => {
-          console.log('Fetched messages from backend:', data);
+          //console.log('Fetched messages from backend:', data);
           const updated = (Array.isArray(data) ? data : [])
             .map(m => ({
               ...m,
               sender: ensureUser(m.sender, m.sender_id || '')
             } as Message));
-          console.log('Mapped messages to set:', updated);
+          //console.log('Mapped messages to set:', updated);
           setMessages(updated);
           setMessagesCache(prev => ({ ...prev, [selectedChat.id]: updated }));
           setMessagesLoading(false);
@@ -393,12 +394,12 @@ export default function ChatsPage() {
       setMediaRecorder(recorder);
       setAudioChunks([]);
       recorder.ondataavailable = (e: BlobEvent) => {
-        console.log('Audio data available', e.data);
+        //console.log('Audio data available', e.data);
         setAudioChunks(prev => [...prev, e.data]);
       };
       recorder.onstop = async () => {
         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-        console.log('Recorder stopped, audioBlob:', audioBlob);
+        //console.log('Recorder stopped, audioBlob:', audioBlob);
         await handleAudioUpload(audioBlob);
         setAudioChunks([]);
       };
@@ -909,7 +910,7 @@ export default function ChatsPage() {
           setNewChatLoading(true);
           setNewChatError(null);
           try {
-            const chat = await createGroupChat(user.id, u.id, user.id);
+            const chat = await createDirectChat(user.id, u.id);
             const data = await fetchUserChats(user.id);
             setChats(data);
             setSelectedChat(data.find((c: any) => c.id === chat.id));
@@ -961,4 +962,4 @@ export default function ChatsPage() {
       )}
     </div>
   );
-} 
+}

@@ -93,14 +93,14 @@ export const NewChatModal = ({ open, onClose, newChatSearch, setNewChatSearch, n
   <Dialog open={open} onClose={onClose} className="fixed z-50 inset-0 overflow-y-auto">
     <div className="flex items-center justify-center min-h-screen px-4">
       <div className="fixed inset-0 bg-black opacity-30" aria-hidden="true" />
-      <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md z-10">
-        <Dialog.Title className="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">Start New Chat</Dialog.Title>
+      <div className="relative bg-white rounded-lg shadow-lg p-6 w-full max-w-md z-10">
+        <Dialog.Title className="text-lg font-bold mb-4 text-gray-900">Start New Chat</Dialog.Title>
         <input
           type="text"
           placeholder="Search users..."
           value={newChatSearch}
           onChange={e => setNewChatSearch(e.target.value)}
-          className="w-full mb-3 px-3 py-2 rounded border border-gray-200 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 outline-none"
+          className="w-full mb-3 px-3 py-2 rounded border border-gray-200 bg-gray-50 text-gray-900 outline-none"
         />
         <div className="max-h-60 overflow-y-auto mb-4">
           {newChatLoading ? (
@@ -124,7 +124,7 @@ export const NewChatModal = ({ open, onClose, newChatSearch, setNewChatSearch, n
                   <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold">
                     {u.full_name?.[0] || u.email?.[0] || "U"}
                   </div>
-                  <span className="text-gray-900 dark:text-gray-100">{u.full_name || u.email}</span>
+                  <span className="text-gray-900">{u.full_name || u.email}</span>
                   <span className="text-xs text-gray-500">{u.email}</span>
                 </button>
               ))
@@ -134,7 +134,7 @@ export const NewChatModal = ({ open, onClose, newChatSearch, setNewChatSearch, n
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-500"
+            className="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300"
             disabled={newChatLoading}
           >
             Close
@@ -219,7 +219,7 @@ export const AddMembersModal = ({ open, onClose, newChatSearch, setNewChatSearch
               onClose();
               setSelectedMembers([]);
             }}
-            className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-500"
+            className="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300"
           >
             Cancel
           </button>
@@ -242,4 +242,4 @@ const Modals = () => {
   return null;
 };
 
-export default Modals; 
+export default Modals;

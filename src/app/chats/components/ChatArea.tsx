@@ -62,14 +62,14 @@ const ChatArea: React.FC<ChatAreaProps> = ({
   return (
     <>
       {/* Chat Area Header: fixed below filter row, full width, z-40 */}
-      <header className="flex items-center px-6 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 fixed z-40"
+      <header className="flex items-center px-6 py-3 border-b border-gray-200 bg-white fixed z-40"
         style={{
           left: 'calc(56px + var(--sidebar-width, 340px))',
           right: 0,
           top: 'var(--header-height)',
           height: 'var(--chat-header-height)',
           width: 'calc(100vw - 56px - var(--sidebar-width, 340px) - 56px)',
-          borderLeft: '2px solid #e5e7eb', // Tailwind gray-200
+          borderLeft: '2px solid #e5e7eb',
           zIndex: 40
         }}>
         {/* Group avatar */}
@@ -122,7 +122,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
       {/* Message list: scrollable, starts below all fixed headers */}
       <div
         ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto p-6 bg-gray-50 dark:bg-gray-900 messages-container"
+        className="flex-1 overflow-y-auto p-6 bg-gray-50 messages-container"
         style={{
           backgroundImage: 'url("/whatsapp-bg.jpg")',
           backgroundRepeat: 'repeat',
@@ -154,7 +154,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
                 <div key={msg.id} className="flex flex-col gap-2">
                   {showDateDivider && (
                     <div className="flex items-center justify-center my-4">
-                      <div className="px-4 py-1 bg-gray-200 dark:bg-gray-700 rounded-full text-sm text-gray-600 dark:text-gray-300">
+                      <div className="px-4 py-1 bg-gray-200 rounded-full text-sm text-gray-600">
                         {formatMessageDate(msg.created_at)}
                       </div>
                     </div>
@@ -174,7 +174,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
                       className={`ml-2 px-4 py-2 rounded-2xl shadow ${
                         isOwn
                           ? "bg-green-100 text-gray-900 rounded-br-none"
-                          : "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-bl-none"
+                          : "bg-white text-gray-900 rounded-bl-none"
                       }`}
                     >
                       <div className="flex items-center gap-2 mb-1">
@@ -280,4 +280,4 @@ const ChatArea: React.FC<ChatAreaProps> = ({
   );
 };
 
-export default ChatArea; 
+export default ChatArea;

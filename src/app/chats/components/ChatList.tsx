@@ -92,9 +92,12 @@ const ChatList: React.FC<ChatListProps> = ({
   handleSidebarResize,
 }) => {
   return (
-    <aside style={{ width: sidebarWidth }} className="flex flex-col bg-white dark:bg-gray-800 transition-all duration-100 relative border-r-2 border-gray-200 dark:border-gray-800 h-full shadow-md">
+    <aside
+      style={{ width: sidebarWidth }}
+      className="flex flex-col bg-white transition-all duration-100 relative border-r-2 border-gray-200 h-full shadow-md"
+    >
       {/* Filter row: fixed below header, responsive to sidebar width */}
-      <div className="flex items-center gap-2 px-3 py-2 border-b-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 fixed z-40"
+      <div className="flex items-center gap-2 px-3 py-2 border-b-2 border-gray-200 bg-white fixed z-40"
         style={{
           left: '56px',
           width: 'var(--sidebar-width, 340px)',
@@ -138,9 +141,8 @@ const ChatList: React.FC<ChatListProps> = ({
                 return (
                   <section
                     key={chat.id}
-                    className={`flex items-center gap-3 px-4 py-3 border-b border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 ${selectedChat?.id === chat.id ? "bg-gray-200 dark:bg-gray-700" : ""}`}
+                    className={`flex items-center gap-3 px-4 py-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50 ${selectedChat?.id === chat.id ? "bg-gray-200" : ""}`}
                     onClick={() => setSelectedChat(chat)}
-                    onContextMenu={e => handleContextMenu(e, chat)}
                   >
                     {/* Avatar or group icon */}
                     {chat.avatar_url ? (
@@ -152,7 +154,7 @@ const ChatList: React.FC<ChatListProps> = ({
                     )}
                     <div className="flex-1 min-w-0 flex flex-col justify-center">
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[120px]">{getDisplayName(chat)}</span>
+                        <span className="font-semibold text-gray-900 truncate max-w-[120px]">{getDisplayName(chat)}</span>
                         {/* Inline labels to the right of name */}
                         <div className="flex items-center gap-1 flex-wrap">
                           {Array.isArray(chat.labels) && chat.labels.map((label: string) => (
@@ -226,4 +228,4 @@ const ChatList: React.FC<ChatListProps> = ({
   );
 };
 
-export default ChatList; 
+export default ChatList;

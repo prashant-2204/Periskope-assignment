@@ -1,9 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
 import { FiHelpCircle, FiRefreshCw, FiChevronDown, FiDownload, FiBellOff, FiStar, FiList } from 'react-icons/fi';
-// TODO: Import types User if needed
-// TODO: Accept props for user, mainLabel, handleRefresh, refreshing, and any other top bar actions
-// TODO: Add clear comments for maintainability
 
 interface HeaderProps {
   mainLabel: string;
@@ -13,7 +10,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ mainLabel, sectionIcons, handleRefresh, refreshing }) => (
-  <header className="flex items-center justify-between w-full px-4 py-2 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 fixed top-0 left-0 right-0 z-50 h-[var(--header-height)]">
+  <header className="flex items-center justify-between w-full px-4 py-2 border-b border-gray-200 bg-white fixed top-0 left-0 right-0 z-50 h-[var(--header-height)]">
     <div className="flex items-center gap-3">
       <Image src="/periskope-icon.webp" alt="Periskope" width={36} height={36} />
       <span className="flex items-center gap-2 text-sm text-gray-500">
@@ -58,4 +55,4 @@ const Header: React.FC<HeaderProps> = ({ mainLabel, sectionIcons, handleRefresh,
   </header>
 );
 
-export default Header; 
+export default Header;
