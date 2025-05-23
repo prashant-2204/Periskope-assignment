@@ -287,39 +287,39 @@ export async function createDirectChat(userId1: string, userId2: string) {
   return chat;
 }
 
-async function handleAddLabel(chatId: string) {
-  const chat = chats.find((c: any) => c.id === chatId);
-  const labels = Array.isArray(chat?.labels) ? chat.labels : [];
-  const newLabel = labelInputValue.trim();
-  if (!newLabel) {
-    toast.error("Label cannot be empty");
-    return;
-  }
-  if (labels.includes(newLabel)) {
-    toast.error("Label already exists");
-    return;
-  }
-  setLabelLoading(true);
-  setChats((prevChats) =>
-    prevChats.map((c) =>
-      c.id === chatId ? { ...c, labels: [...labels, newLabel] } : c
-    )
-  );
-  setLabelInputValue("");
-  setLabelInputChatId(null);
-  try {
-    // Ensure labels is an array of strings
-    await supabase
-      .from("chats")
-      .update({
-        labels: `{${[...labels, newLabel].map((l) => `"${l}"`).join(",")}}`,
-      })
-      .eq("id", chatId);
-    // If you still get 400, try:
-    // await supabase.from('chats').update({ labels: `{${[...labels, newLabel].map(l => `"${l}"`).join(',')}}` }).eq('id', chatId);
-  } catch (err) {
-    toast.error("Failed to add label");
-  } finally {
-    setLabelLoading(false);
-  }
-}
+// async function handleAddLabel(chatId: string) {
+//   const chat = chats.find((c: any) => c.id === chatId);
+//   const labels = Array.isArray(chat?.labels) ? chat.labels : [];
+//   const newLabel = labelInputValue.trim();
+//   if (!newLabel) {
+    
+//     return;
+//   }
+//   if (labels.includes(newLabel)) {
+    
+//     return;
+//   }
+//   setLabelLoading(true);
+//   setChats((prevChats) =>
+//     prevChats.map((c) =>
+//       c.id === chatId ? { ...c, labels: [...labels, newLabel] } : c
+//     )
+//   );
+//   setLabelInputValue("");
+//   setLabelInputChatId(null);
+//   try {
+//     // Ensure labels is an array of strings
+//     await supabase
+//       .from("chats")
+//       .update({
+//         labels: `{${[...labels, newLabel].map((l) => `"${l}"`).join(",")}}`,
+//       })
+//       .eq("id", chatId);
+//     // If you still get 400, try:
+//     // await supabase.from('chats').update({ labels: `{${[...labels, newLabel].map(l => `"${l}"`).join(',')}}` }).eq('id', chatId);
+//   } catch (err) {
+//     toast.error("Failed to add label");
+//   } finally {
+//     setLabelLoading(false);
+//   }
+// }
